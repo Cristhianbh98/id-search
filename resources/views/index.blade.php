@@ -5,7 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Reconocer Documentos</title>
     <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet" type="text/css"/>
-    <script src="{{ asset('js/pdf.mjs') }}" type="module"></script>
+
+    <script>
+      var defaultPDF = "{{ asset('documents/default.pdf') }}"
+      var assetsURL = "{{ asset('documents/') }}"
+    </script>
+    <!-- Scripts -->
+    @vite(['resources/js/app.js'])
   </head>
 
   <body>
@@ -28,42 +34,5 @@
       </div>
     </div>
     <script src="{{ asset('js/bootstrap.min.js') }}"></script>
-    <script type="module">
-      var defaultPDF = "{{ asset('documents/default.pdf') }}"
-      var assetsURL = "{{ asset('documents/') }}"
-      var { pdfjsLib } = globalThis
-      pdfjsLib.GlobalWorkerOptions.workerSrc = "{{ asset('js/pdf.worker.mjs') }}"
-
-      document.getElementById('form').addEventListener('submit', async (e) => {
-        e.preventDefault()
-        var cedula = document.getElementById('cedula').value
-        var urlPdf = `${assetsURL}/${cedula}.pdf`
-        renderPdf(urlPdf)
-      });
-
-      async function renderPdf(pdfToRender) {
-        var pdf
-        try {
-          pdf = await pdfjsLib.getDocument(pdfToRender).promise
-        } catch(e) {
-          pdf = await pdfjsLib.getDocument(defaultPDF).promise
-        }
-
-        if (!pdf) return console.error('No se pudo cargar el pdf')
-
-        var page = await pdf.getPage(1)
-        var scale = 1
-        var viewport = page.getViewport({scale})
-        var canvas = document.getElementById('pdf')
-        var context = canvas.getContext('2d')
-        canvas.height = viewport.height
-        canvas.width = viewport.width
-        var renderContext = {
-          canvasContext: context,
-          viewport,
-        };
-        await page.render(renderContext);
-      }
-    </script>
   </body>
 </html>
